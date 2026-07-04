@@ -12,6 +12,7 @@ import cv2
 import numpy as np
 import torch
 import torch.nn as nn
+import urllib.request
 from torchvision import transforms, models
 from PIL import Image
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
@@ -44,11 +45,15 @@ CLASSES = ["Acne", "Blackheads", "Dark Spots"]
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"[SkinSync v2] Device: {device}")
 
-# ══════════════════════════════════════════════════════════════════════════════
-# LOAD MODEL
-# ══════════════════════════════════════════════════════════════════════════════
 if not os.path.exists(MODEL_PATH):
-    raise FileNotFoundError(f"[SkinSync v2] Model file not found at: {MODEL_PATH}")
+    print("[SkinSync v2] Model tidak ditemukan di server. Mengunduh dari GitHub Releases...")
+    DOWNLOAD_URL = "https://github.com/RyanZufar/project_machine_learning/releases/download/v1.0.0/best_skin_model.pth"
+    
+    try:
+        urllib.request.urlretrieve(DOWNLOAD_URL, MODEL_PATH)
+        print("[SkinSync v2] Model sukses diunduh secara otomatis!")
+    except Exception as e:
+        raise RuntimeError(f"[SkinSync v2] Gagal mengunduh model: {e}")
 
 try:
     model = models.efficientnet_b3(weights=None)
